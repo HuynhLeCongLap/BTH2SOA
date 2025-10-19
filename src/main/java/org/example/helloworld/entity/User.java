@@ -3,18 +3,22 @@ package org.example.helloworld.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "users")
+@Table(name = "user")
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "`IdUser`")
     private Integer idUser;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "`UserName`", nullable = false, unique = true)
     private String userName;
 
-    @Column(nullable = false)
+    @Column(name = "`Password`", nullable = false)
     private String password;
+
+    @Column(name = "`Token`")
+    private String token;
 
     // Getter & Setter
     public Integer getIdUser() { return idUser; }
@@ -25,4 +29,7 @@ public class User {
 
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+
+    public String getToken() { return token; }
+    public void setToken(String token) { this.token = token; }
 }

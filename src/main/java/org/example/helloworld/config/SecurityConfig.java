@@ -16,7 +16,8 @@ public class SecurityConfig {
     public FilterRegistrationBean<JwtFilter> filterRegistrationBean() {
         FilterRegistrationBean<JwtFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(jwtFilter);
-        registrationBean.addUrlPatterns("/hello"); // apply filter cho /hello
+        registrationBean.addUrlPatterns("/hello", "/"); // apply filter cho /hello và /
+        registrationBean.setOrder(1); // Đảm bảo filter chạy trước
         return registrationBean;
     }
 }
