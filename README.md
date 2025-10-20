@@ -1,76 +1,132 @@
-# Bài Thực Hành Số 2 - JWT Authentication API
+# Product Management Service
 
 ## Mô tả
-Dự án thực hiện xây dựng RESTful API với JWT authentication theo yêu cầu Bài thực hành số 2.
+Dịch vụ quản lý sản phẩm (Product Management Service) - Bài thực hành số 3
 
-## Yêu cầu đã đáp ứng
+## Kiến trúc SOA
+- **Port**: 8081 (khác với Auth Service - 8080)
+- **Database**: PRODUCT_DB (riêng biệt với SOA database)
+- **Authentication**: Sử dụng JWT từ Auth Service
 
-### ✅ Cài đặt thư viện JWT
-- Sử dụng `io.jsonwebtoken:jjwt-api:0.11.5`
-- Có JwtUtil và JwtService để xử lý JWT
+## API Endpoints
 
-### ✅ Dịch vụ đăng nhập
-- **URL**: `POST localhost:8080/login`
-- **Tham số**: 
-  ```json
-  {
-    "username": "lap",
-    "password": "123"
-  }
-  ```
-- **Response**: JWT token
+### 🔐 Yêu cầu Authentication
+Tất cả endpoints đều yêu cầu JWT token trong header:
+```
+Authorization: Bearer <jwt-token>
+```
 
-### ✅ API xác thực token
-- **URL**: `POST localhost:8080/auth`
-- **Header**: `Authorization: Bearer <token>`
-- **Response**: Thông báo token hợp lệ hoặc lỗi
+### 📋 CRUD Operations
 
-### ✅ Middleware xác thực JWT
-- JwtFilter được áp dụng cho các endpoint `/hello` và `/`
-- Kiểm tra token trong header Authorization
+#### 1. GET /products
+Lấy danh sách tất cả sản phẩm
+```bash
+curl -X GET http://localhost:8081/products \
+  -H "Authorization: Bearer <token>"
+```
 
-### ✅ API Hello World được bảo vệ
-- **URL**: `GET localhost:8080/hello` hoặc `GET localhost:8080/`
-- **Yêu cầu**: Token JWT hợp lệ trong header
-- **Response**: "Hello World from Spring Boot!"
+#### 2. GET /products/{id}
+Lấy thông tin chi tiết một sản phẩm
+```bash
+curl -X GET http://localhost:8081/products/1 \
+  -H "Authorization: Bearer <token>"
+```
 
-### ✅ Bảng User
-- **Cấu trúc**:
-  - `idUser` (INT, PRIMARY KEY)
-  - `userName` (VARCHAR(255))
-  - `password` (VARCHAR(255))
-  - `token` (VARCHAR(255))
+#### 3. POST /products
+Thêm một sản phẩm mới
+```bash
+curl -X POST http://localhost:8081/products \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "New Product",
+    "description": "Product description",
+    "price": 99.99,
+    "quantity": 10
+  }'
+```
 
-## Cách sử dụng
+#### 4. PUT /products/{id}
+Cập nhật thông tin sản phẩm
+```bash
+curl -X PUT http://localhost:8081/products/1 \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated Product",
+    "price": 149.99,
+    "quantity": 15
+  }'
+```
 
-### 1. Đăng nhập để lấy token
+#### 5. DELETE /products/{id}
+Xóa một sản phẩm
+```bash
+curl -X DELETE http://localhost:8081/products/1 \
+  -H "Authorization: Bearer <token>"
+```
+
+### 🔍 Additional Endpoints
+
+#### 6. GET /products/search?name=...
+Tìm kiếm sản phẩm theo tên
+```bash
+curl -X GET "http://localhost:8081/products/search?name=iPhone" \
+  -H "Authorization: Bearer <token>"
+```
+
+#### 7. GET /products/available
+Lấy sản phẩm còn hàng (quantity > 0)
+```bash
+curl -X GET http://localhost:8081/products/available \
+  -H "Authorization: Bearer <token>"
+```
+
+## Database Schema
+
+### Bảng products
+| Cột | Kiểu dữ liệu | Mô tả |
+|-----|--------------|-------|
+| id | INT (PRIMARY KEY) | ID duy nhất của sản phẩm |
+| name | VARCHAR(255) | Tên sản phẩm |
+| description | TEXT | Mô tả sản phẩm |
+| price | DECIMAL(10,2) | Giá sản phẩm |
+| quantity | INT | Số lượng sản phẩm trong kho |
+| created_at | TIMESTAMP | Ngày sản phẩm được tạo |
+| updated_at | TIMESTAMP | Ngày sản phẩm được cập nhật lần cuối |
+
+## Cách chạy
+
+### 1. Khởi động Auth Service (port 8080)
+```bash
+cd ../helloworld
+./gradlew bootRun
+```
+
+### 2. Lấy JWT token
 ```bash
 curl -X POST http://localhost:8080/login \
   -H "Content-Type: application/json" \
   -d '{"username": "lap", "password": "123"}'
 ```
 
-### 2. Xác thực token
+### 3. Khởi động Product Service (port 8081)
 ```bash
-curl -X POST http://localhost:8080/auth \
-  -H "Authorization: Bearer <your-token>"
-```
-
-### 3. Truy cập API Hello World (cần token)
-```bash
-curl -X GET http://localhost:8080/hello \
-  -H "Authorization: Bearer <your-token>"
-```
-
-## Cấu hình Database
-- **Database**: MySQL
-- **URL**: `jdbc:mysql://localhost:3306/SOA`
-- **Username**: `root`
-- **Password**: `Lapmo843@`
-
-## Chạy ứng dụng
-```bash
+cd ../product-service
 ./gradlew bootRun
 ```
 
-Ứng dụng sẽ chạy trên `http://localhost:8080`
+### 4. Test Product APIs
+```bash
+# Lấy danh sách sản phẩm
+curl -X GET http://localhost:8081/products \
+  -H "Authorization: Bearer <token>"
+```
+
+## Dữ liệu mẫu
+Service đã có sẵn 5 sản phẩm mẫu:
+- iPhone 15 - $999.99
+- Samsung Galaxy S24 - $899.99
+- MacBook Pro - $1999.99
+- Dell XPS 13 - $1299.99
+- iPad Air - $599.99

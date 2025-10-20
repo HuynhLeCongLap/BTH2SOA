@@ -10,8 +10,7 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    private final String SECRET_KEY = "mysecretkeymysecretkeymysecretkey!"; // >= 256 bit
-
+    private final String SECRET_KEY = "mysecretkeymysecretkeymysecretkey!"; // ✅ phải giống y chang bài 2
     private final long EXPIRATION_TIME = 1000 * 60 * 60; // 1 giờ
 
     private Key getSigningKey() {
